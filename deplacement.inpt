@@ -1,3 +1,5 @@
 50.175232345    ! x cell vector in a.u
 50.175232345    ! y cell vector in a.u
 50.175232345    ! z cell vector in a.u
+1               ! number of species
+! block do to for each specie

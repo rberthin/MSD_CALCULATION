@@ -6,36 +6,36 @@ PROGRAM CALCUL_DEPLACEMENT
    
    IMPLICIT NONE
    
-   CHARACTER*200 :: crap
+   CHARACTER(LEN=200) :: crap
    CHARACTER(LEN=10) :: nom
    INTEGER :: nb_lines, nb_species_tot, i, nb_atomes_par_conf
-   INTEGER :: w, j, element, id, n, nb_configs, k, m, q, p
-   INTEGER :: io
+   INTEGER :: w, j, n, k, m, q, p
+   INTEGER :: io, element, id, nb_configs
    DOUBLE PRECISION :: boxx, boxy, boxz
-   DOUBLE PRECISION, DIMENSION(3) :: box_size, coord_1, coord_2
    INTEGER, ALLOCATABLE, DIMENSION (:) :: nb_part
    DOUBLE PRECISION, DIMENSION(3) :: distance
    DOUBLE PRECISION, ALLOCATABLE, DIMENSION (:,:) :: CY, CY2
    
    OPEN(UNIT = 11, FILE = "deplacement.inpt", STATUS='old', IOSTAT=io)
 
-   ! PARAMETRE DE LA BOITE DE SIMULATION
-   !------------------------------------
+   ! READ DEPLACEMENT.INPT
+   !-----------------------
    READ(11,*) boxx
    boxx = boxx*bohr
    READ(11,*) boxy
    boxy = boxy*bohr
    READ(11,*) boxz
    boxz = boxz*bohr
-   !------------------------------------
-   nb_species_tot = 1296
+   READ(11,*) nb_species
+   READ(11,*) !read comment
+   !-----------------------
    ! NB LIGNES TRAJECTOIRE
    !------------------------------------
    nb_lines = 0
    OPEN(unit = 10, file = "trajectories.xyz", status='old', iostat=io)
    nb_lines = count_lines(10)
    !------------------------------------
-     
+   nb_species_tot = 1296  
    nb_configs = nb_lines/(nb_species_tot+2)
    write(6,*) nb_configs
    OPEN(unit = 20, file = "deplacements.out")
