@@ -20,7 +20,7 @@ INC=-I$(MODDIR) -J$(MODDIR)
 ##########################################################
 
 SANDBOX = calcul_deplacement.x
-MODULES = distance_pbc.o num_lines_file.o
+MODULES = distance_pbc.o num_lines_file.o constants.o
 
 all: $(SANDBOX)
 

@@ -2,6 +2,7 @@ PROGRAM CALCUL_DEPLACEMENT
    
    USE DISTANCE_PBC
    USE NUM_LINES_FILE
+   USE CONSTANTS
    
    IMPLICIT NONE
    
@@ -10,13 +11,12 @@ PROGRAM CALCUL_DEPLACEMENT
    INTEGER :: nb_lines, nb_species_tot, i, nb_atomes_par_conf
    INTEGER :: w, j, element, id, n, nb_configs, k, m, q, p
    INTEGER :: io
-   DOUBLE PRECISION :: bohr, x, y, z
+   DOUBLE PRECISION :: x, y, z
    DOUBLE PRECISION, DIMENSION(3) :: box_size, coord_1, coord_2
    INTEGER, ALLOCATABLE, DIMENSION (:) :: nb_part
    DOUBLE PRECISION, DIMENSION(3) :: distance
    DOUBLE PRECISION, ALLOCATABLE, DIMENSION (:,:) :: CY, CY2
    
-   bohr = 0.529177
    
    ! PARAMETRE DE LA BOITE DE SIMULATION
    !------------------------------------
@@ -36,7 +36,6 @@ PROGRAM CALCUL_DEPLACEMENT
    nb_configs = nb_lines/(nb_species_tot+2)
    write(6,*) nb_configs
    OPEN(unit = 20, file = "deplacements.out")
-   !OPEN(unit = 21, file = "test.out")
    
    ! LECTURE DE LA TRAJECTOIRE
    !------------------------------------
@@ -46,7 +45,6 @@ PROGRAM CALCUL_DEPLACEMENT
    
    READ(10,*) crap  
    READ(10,*) crap
-   WRITE(21,*) crap
    
    DO n = 1, 216
       READ(10,*) crap
