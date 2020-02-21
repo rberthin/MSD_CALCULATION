@@ -11,21 +11,24 @@ PROGRAM CALCUL_DEPLACEMENT
    INTEGER :: nb_lines, nb_species_tot, i, nb_atomes_par_conf
    INTEGER :: w, j, element, id, n, nb_configs, k, m, q, p
    INTEGER :: io
-   DOUBLE PRECISION :: x, y, z
+   DOUBLE PRECISION :: boxx, boxy, boxz
    DOUBLE PRECISION, DIMENSION(3) :: box_size, coord_1, coord_2
    INTEGER, ALLOCATABLE, DIMENSION (:) :: nb_part
    DOUBLE PRECISION, DIMENSION(3) :: distance
    DOUBLE PRECISION, ALLOCATABLE, DIMENSION (:,:) :: CY, CY2
    
-   
+   OPEN(UNIT = 11, FILE = "deplacement.inpt", STATUS='old', IOSTAT=io)
+
    ! PARAMETRE DE LA BOITE DE SIMULATION
    !------------------------------------
-   x = 50.175232345*bohr
-   y = 50.175232345*bohr
-   z = 50.175232345*bohr
-   nb_species_tot = 1296
+   READ(11,*) boxx
+   boxx = boxx*bohr
+   READ(11,*) boxy
+   boxy = boxy*bohr
+   READ(11,*) boxz
+   boxz = boxz*bohr
    !------------------------------------
-   
+   nb_species_tot = 1296
    ! NB LIGNES TRAJECTOIRE
    !------------------------------------
    nb_lines = 0
@@ -69,9 +72,9 @@ PROGRAM CALCUL_DEPLACEMENT
       ENDDO
       DO m = 1, 216
          READ(10,*) nom, CY2(m,1), CY2(m,2), CY2(m,3)
-         distance(1) = DISTANCE_PBC_OPT(CY(m,1), CY2(m,1), x)
-         distance(2) = DISTANCE_PBC_OPT(CY(m,2), CY2(m,2), y)
-         distance(3) = DISTANCE_PBC_OPT(CY(m,3), CY2(m,3), z)
+         distance(1) = DISTANCE_PBC_OPT(CY(m,1), CY2(m,1), boxx)
+         distance(2) = DISTANCE_PBC_OPT(CY(m,2), CY2(m,2), boxy)
+         distance(3) = DISTANCE_PBC_OPT(CY(m,3), CY2(m,3), boxz)
          WRITE(20,*) distance(1), distance(2), distance(3)
          CY(m,1) = CY2(m,1)
          CY(m,2) = CY2(m,2)
