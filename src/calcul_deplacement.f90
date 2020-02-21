@@ -8,14 +8,14 @@ PROGRAM CALCUL_DEPLACEMENT
    
    CHARACTER(LEN=200) :: crap
    CHARACTER(LEN=10) :: nom
-   INTEGER :: nb_lines, nb_species_tot, i, nb_atomes_par_conf
-   INTEGER :: w, j, n, k, m, q, p
+   INTEGER :: nb_lines, nb_species
+   INTEGER :: w, j, n, k, m, q, p, i
    INTEGER :: io, element, id, nb_configs
    DOUBLE PRECISION :: boxx, boxy, boxz
-   INTEGER, ALLOCATABLE, DIMENSION (:) :: nb_part
    DOUBLE PRECISION, DIMENSION(3) :: distance
    DOUBLE PRECISION, ALLOCATABLE, DIMENSION (:,:) :: CY, CY2
-   
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: num_atoms, ref_atom, num_molecules
+ 
    OPEN(UNIT = 11, FILE = "deplacement.inpt", STATUS='old', IOSTAT=io)
 
    ! READ DEPLACEMENT.INPT
@@ -26,8 +26,17 @@ PROGRAM CALCUL_DEPLACEMENT
    boxy = boxy*bohr
    READ(11,*) boxz
    boxz = boxz*bohr
+   READ(11,*) nb_configs
    READ(11,*) nb_species
    READ(11,*) !read comment
+   ALLOCATE(num_atoms(nb_species))
+   ALLOCATE(ref_atom(nb_species))
+   ALLOCATE(num_molecules(nb_species))
+   DO i = 1, nb_species
+     READ(11,*) num_molecules(i)
+     READ(11,*) num_atoms(i)
+     READ(11,*) ref_atom(i)
+   ENDDO
    !-----------------------
    ! NB LIGNES TRAJECTOIRE
    !------------------------------------
@@ -35,9 +44,8 @@ PROGRAM CALCUL_DEPLACEMENT
    OPEN(unit = 10, file = "trajectories.xyz", status='old', iostat=io)
    nb_lines = count_lines(10)
    !------------------------------------
-   nb_species_tot = 1296  
-   nb_configs = nb_lines/(nb_species_tot+2)
-   write(6,*) nb_configs
+   !nb_configs = nb_lines/(nb_species_tot+2)
+   !write(6,*) nb_configs
    OPEN(unit = 20, file = "deplacements.out")
    
    ! LECTURE DE LA TRAJECTOIRE
