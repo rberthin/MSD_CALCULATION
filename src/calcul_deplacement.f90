@@ -35,65 +35,66 @@ PROGRAM CALCUL_DEPLACEMENT
    DO i = 1, nb_species
      READ(11,*) num_molecules(i)
      READ(11,*) num_atoms(i)
-     READ(11,*) ref_atom(i)
+     READ(11,*) ref_atom(i)     ! deplacement computed on this atom -> results in deplacemnts.out
    ENDDO
    !-----------------------
    ! NB LIGNES TRAJECTOIRE
-   !------------------------------------
+   !-----------------------
    nb_lines = 0
    OPEN(unit = 10, file = "trajectories.xyz", status='old', iostat=io)
    nb_lines = count_lines(10)
    !------------------------------------
-   !nb_configs = nb_lines/(nb_species_tot+2)
-   !write(6,*) nb_configs
    OPEN(unit = 20, file = "deplacements.out")
-   
+   !--------------------------
    ! LECTURE DE LA TRAJECTOIRE
-   !------------------------------------
+   !--------------------------
+   DO i = 1, nb_species
+  
+     READ(10,*)
+     READ(10,*) 
    
-   ALLOCATE(CY(216,3))
-   ALLOCATE(CY2(216,3))
+     ALLOCATE(POS1(num_molecules(i),3))
+     ALLOCATE(POS2(num_molecules(i),3))
    
-   READ(10,*) crap  
-   READ(10,*) crap
-   
-   DO n = 1, 216
-      READ(10,*) crap
+   !DO n = 1, 216
+   !   READ(10,*) crap
+   !ENDDO
+   !
+   !DO m = 1, 216
+   !   READ(10,*) nom, CY(m,1), CY(m,2), CY(m,3)
+   !ENDDO
+   !
+   !DO p = 1,  (nb_species_tot-432)
+   !   READ(10,*) crap
+   !ENDDO
+   !
+   !DO w = 1, nb_configs-1
+   !   
+   !   READ(10,*) crap
+   !   READ(10,*) crap
+   !
+   !   write(6,*) 'STEP', w
+   !   DO n = 1, 216
+   !      READ(10,*)
+   !   ENDDO
+   !   DO m = 1, 216
+   !      READ(10,*) nom, CY2(m,1), CY2(m,2), CY2(m,3)
+   !      distance(1) = DISTANCE_PBC_OPT(CY(m,1), CY2(m,1), boxx)
+   !      distance(2) = DISTANCE_PBC_OPT(CY(m,2), CY2(m,2), boxy)
+   !      distance(3) = DISTANCE_PBC_OPT(CY(m,3), CY2(m,3), boxz)
+   !      WRITE(20,*) distance(1), distance(2), distance(3)
+   !      CY(m,1) = CY2(m,1)
+   !      CY(m,2) = CY2(m,2)
+   !      CY(m,3) = CY2(m,3)           
+   !   ENDDO
+   !   DO p = 1, (nb_species_tot-432)  
+   !      READ(10,*) crap
+   !   ENDDO
+   !ENDDO
+   !WRITE(6,*) ' **** ALL DONE !! ****'
+     DEALLOCATE(POS1)
+     DEALLOCATE(POS2) 
    ENDDO
-   
-   DO m = 1, 216
-      READ(10,*) nom, CY(m,1), CY(m,2), CY(m,3)
-   ENDDO
-   
-   DO p = 1,  (nb_species_tot-432)
-      READ(10,*) crap
-   ENDDO
-   
-   DO w = 1, nb_configs-1
-      
-      READ(10,*) crap
-      READ(10,*) crap
-   
-      write(6,*) 'STEP', w
-      DO n = 1, 216
-         READ(10,*)
-      ENDDO
-      DO m = 1, 216
-         READ(10,*) nom, CY2(m,1), CY2(m,2), CY2(m,3)
-         distance(1) = DISTANCE_PBC_OPT(CY(m,1), CY2(m,1), boxx)
-         distance(2) = DISTANCE_PBC_OPT(CY(m,2), CY2(m,2), boxy)
-         distance(3) = DISTANCE_PBC_OPT(CY(m,3), CY2(m,3), boxz)
-         WRITE(20,*) distance(1), distance(2), distance(3)
-         CY(m,1) = CY2(m,1)
-         CY(m,2) = CY2(m,2)
-         CY(m,3) = CY2(m,3)           
-      ENDDO
-      DO p = 1, (nb_species_tot-432)  
-         READ(10,*) crap
-      ENDDO
-   ENDDO
-   WRITE(6,*) ' **** ALL DONE !! ****'
    CLOSE(10)
    CLOSE(20)
-
 END PROGRAM CALCUL_DEPLACEMENT
