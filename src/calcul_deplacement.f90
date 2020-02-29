@@ -8,7 +8,7 @@ PROGRAM CALCUL_DEPLACEMENT
    
    CHARACTER(LEN=200) :: crap
    CHARACTER(LEN=10) :: nom
-   INTEGER :: nb_lines, nb_species
+   INTEGER :: nb_lines, nb_species, mol, ref
    INTEGER :: w, j, n, k, m, q, p, i
    INTEGER :: io, element, id, nb_configs
    DOUBLE PRECISION :: boxx, boxy, boxz
@@ -51,41 +51,46 @@ PROGRAM CALCUL_DEPLACEMENT
    DO i = 1, nb_species
   
      READ(10,*)
-     READ(10,*) 
+     READ(10,*)
+
+     mol = num_molecules(i)
+     atom = num_atoms(i)
+     ref = ref_atom(i)
+
+     ALLOCATE(POS1(mol,3))
+     ALLOCATE(POS2(mol,3))
+    
+     DO k = 1, atom
+        IF (k.neq.ref) THEN
+           DO j = 1, mol
+              READ(10,*)
+           ENDDO
+        ELSE IF (k.eq.ref) THEN
+           DO j = 1, mol 
+              READ(10,*) nom, POS1(j,1), POS1(j,2), POS1(j,3)
+           ENDDO
+        ENDIF 
+     ENDDO 
    
-     ALLOCATE(POS1(num_molecules(i),3))
-     ALLOCATE(POS2(num_molecules(i),3))
+     DO w = 1, nb_configs-1
+  
+        READ(10,*) crap
+        READ(10,*) crap
    
-   !DO n = 1, 216
-   !   READ(10,*) crap
-   !ENDDO
-   !
-   !DO m = 1, 216
-   !   READ(10,*) nom, CY(m,1), CY(m,2), CY(m,3)
-   !ENDDO
-   !
-   !DO p = 1,  (nb_species_tot-432)
-   !   READ(10,*) crap
-   !ENDDO
-   !
-   !DO w = 1, nb_configs-1
-   !   
-   !   READ(10,*) crap
-   !   READ(10,*) crap
-   !
-   !   write(6,*) 'STEP', w
+        WRITE(6,*) 'STEP', w
    !   DO n = 1, 216
    !      READ(10,*)
    !   ENDDO
    !   DO m = 1, 216
    !      READ(10,*) nom, CY2(m,1), CY2(m,2), CY2(m,3)
-   !      distance(1) = DISTANCE_PBC_OPT(CY(m,1), CY2(m,1), boxx)
-   !      distance(2) = DISTANCE_PBC_OPT(CY(m,2), CY2(m,2), boxy)
-   !      distance(3) = DISTANCE_PBC_OPT(CY(m,3), CY2(m,3), boxz)
-   !      WRITE(20,*) distance(1), distance(2), distance(3)
-   !      CY(m,1) = CY2(m,1)
-   !      CY(m,2) = CY2(m,2)
-   !      CY(m,3) = CY2(m,3)           
+         
+         distance(1) = DISTANCE_PBC_OPT(POS1(m,1), POS2(m,1), boxx)
+         distance(2) = DISTANCE_PBC_OPT(POS1(m,2), POS2(m,2), boxy)
+         distance(3) = DISTANCE_PBC_OPT(POS1(m,3), POS2(m,3), boxz)
+         WRITE(20,*) distance(1), distance(2), distance(3)
+         POS1(m,1) = POS2(m,1)
+         POS1(m,2) = POS2(m,2)
+         POS1(m,3) = POS2(m,3)           
    !   ENDDO
    !   DO p = 1, (nb_species_tot-432)  
    !      READ(10,*) crap
