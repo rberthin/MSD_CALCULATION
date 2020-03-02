@@ -1,7 +1,7 @@
 50.175232345    ! x cell vector in a.u
 50.175232345    ! y cell vector in a.u
 50.175232345    ! z cell vector in a.u
-4000            ! number steps
+4001            ! number steps
 1               ! number of species
 ! block do to for each specie
 216              ! number of molecules
