@@ -1,130 +1,118 @@
-      program msd
+PROGRAM MSD
 
-c Last altered 14.3.01
+! Last altered 14.3.01
 
-      implicit double precision (a-h,o-z)
+   IMPLICIT DOUBLE PRECISION(a-h,o-z)
+   PARAMETER(nmsdcorrmax=10000)
+   PARAMETER(nummax=4000)
+   PARAMETER(nspmax=4)
 
-      parameter (nmsdcorrmax=10000)
-      parameter (nummax=4000)
-      parameter (nspmax=4)
+   COMMON/msdarray/xdisp(nummax),xdispstore(nummax,nmsdcorrmax),
+                 & ydisp(nummax),ydispstore(nummax,nmsdcorrmax),
+                 & zdisp(nummax),zdispstore(nummax,nmsdcorrmax)
+   COMMON/msdcorr/xmsd(nummax,0:nmsdcorrmax),
+                & ymsd(nummax,0:nmsdcorrmax),
+                & zmsd(nummax,0:nmsdcorrmax),
+                & norm(nummax,0:nmsdcorrmax)
+   COMMON/conduct/xds(0:nmsdcorrmax,nspmax,nspmax),
+                & yds(0:nmsdcorrmax,nspmax,nspmax),
+                & zds(0:nmsdcorrmax,nspmax,nspmax),
+                & normtot(0:nmsdcorrmax )
+   COMMON/msdint/nmsdlength,nmsdcalltime,mcorrtime
+   COMMON/typsp/ntype(nummax),numspc(nspmax)
+   COMMON/sizeof/num
+   COMMON/step/nstep, nrun
+   COMMON/over/overflow 
+   COMMON/timest/dtime
+   COMMON/ntype/ncation1, ncation2, ncation3, nanion
+   COMMON/ntype2/z(nspmax), nspecies
+   COMMON/files/rstfile, filename
+
+   CHARACTER(LEN=200) :: filein
+   CHARACTER(LEN=20) :: rstfile, filename
+   rstfile='msdrst.dat'
  
-      common/msdarray/xdisp(nummax),xdispstore(nummax,nmsdcorrmax),
-     &		      ydisp(nummax),ydispstore(nummax,nmsdcorrmax),
-     &		      zdisp(nummax),zdispstore(nummax,nmsdcorrmax)
-      common/msdcorr/xmsd(nummax,0:nmsdcorrmax),
-     &		     ymsd(nummax,0:nmsdcorrmax),
-     &		     zmsd(nummax,0:nmsdcorrmax),
-     &		     norm(nummax,0:nmsdcorrmax)
-      common/conduct/ xds(0:nmsdcorrmax,nspmax,nspmax),
-     &                yds(0:nmsdcorrmax,nspmax,nspmax),
-     &                zds(0:nmsdcorrmax,nspmax,nspmax),
-     &                normtot(0:nmsdcorrmax )
-      common/msdint/nmsdlength,nmsdcalltime,mcorrtime
-      common/typsp/ntype(nummax),numspc(nspmax)
-      common/sizeof/num
-      common/step/nstep,nrun
-      common/over/overflow 
-      common/timest/dtime
-      common/ntype/ncation1,ncation2,ncation3,nanion
-      common/ntype2/z(nspmax),nspecies
-      common/files/rstfile,filename
+   LOGICAL overflow
+   LOGICAL restart
+   LOGICAL endrun
+   LOGICAL readfrominpt_log
+   restart=.false.
+   overflow=.false.
+   endrun=.false.
+   readfrominpt_log=.false.
+   REAL bin
+   INTEGER nbin
 
-      character*200 filein
-      logical overflow
-      logical restart
-      logical endrun
-      logical readfrominpt_log
+!----------------
+! GET PARAMETERS
+!----------------
 
-      real bin
-      integer nbin
+      OPEN(10, FILE='msd.inpt')
+      READ(10,'(a)') filein
+      OPEN(11, FILE=filein, STATUS='old', FORM='formatted')
+      READ(10,*) num
+      READ(10,*) nanion
+      READ(10,*) ncation1
+      READ(10,*) ncation2
+      READ(10,*) ncation3
+      READ(10,*) nmsdlength
+      READ(10,*) nspecies
 
-      character*20 rstfile,filename
-      rstfile='msdrst.dat'
+      IF(nspecies.gt.nspmax.or.num.gt.nummax.or.nmsdlength.gt.nmsdcorrmax) THEN
+          WRITE(6,*) '***Problems with array dimensions***'
+          STOP
+      ENDIF
 
-      restart=.false.
-      overflow=.false.
-      endrun=.false.
-      readfrominpt_log=.false.
-
-c==================================================
-c Get parameters
-c==================================================
-
-
-      open(10,file='msd.inpt')
-      read(10,'(a)') filein
-      open(11,file=filein,status='old',form='formatted')
-      read(10,*) num
-      read(10,*) nanion
-      read(10,*) ncation1
-      read(10,*) ncation2
-      read(10,*) ncation3
-      read(10,*) nmsdlength
-      read(10,*) nspecies
-
-      if(nspecies.gt.nspmax.or.num.gt.nummax.or.
-     &nmsdlength.gt.nmsdcorrmax) then
-          write(6,*) '***Problems with array dimensions***'
-          stop
-      endif
-
-      do 10 ns=1,nspecies
-          read(10,*) z(ns)
-10    continue
-
+      DO 10 ns = 1, nspecies
+         READ(10,*) z(ns)
+10    CONTINUE
  
-      do 12 ns=1,nspecies
-          filename='msd'//char(ns+48)//'.dat'
-          open (52+ns,file=filename)
-          do 11 ns2=ns,nspecies
-              filename='msdcollect'//char(ns+48)//char(ns2+48)//'.dat'
-              open (70+(ns*nspecies)+ns2,file=filename)
-11        continue
-12    continue
-      open (98,file='work.dat')
-      open (99,file='nernst.dat')
-  
+      DO 12 ns = 1, nspecies
+          filename = 'msd'//char(ns+48)//'.dat'
+          OPEN (52 + ns, FILE=filename)
+          DO 11 ns2 = ns, nspecies
+              filename = 'msdcollect'//char(ns+48)//char(ns2+48)//'.dat'
+              OPEN (70+(ns*nspecies)+ns2,FILE=filename)
+11        CONTINUE
+12    CONTINUE
+      OPEN (98, FILE='work.dat')
+      OPEN (99, FILE='nernst.dat')
 
-c==================================================
-c Zero arrays
-c==================================================
+!****************
+! Zero arrays
+!****************
 
-      do 20 n=1,num
+      DO 20 n = 1, num
+         xdisp(n) = 0.0d0
+         ydisp(n) = 0.0d0
+         xdisp(n) = 0.0d0
 
-          xdisp(n)=0.0d0
-          ydisp(n)=0.0d0
-          xdisp(n)=0.0d0
+         DO 15 i = 1, nmsdcorrmax
+            xdispstore(n,i) = 0.0d0
+            ydispstore(n,i) = 0.0d0
+            zdispstore(n,i) = 0.0d0
+15       CONTINUE
+20    CONTINUE
 
-	  do 15 i=1,nmsdcorrmax
+      DO 40 n=1,num
+         DO 30 i = 0, nmsdcorrmax
+            xmsd(n,i) = 0.0d0
+            ymsd(n,i) = 0.0d0
+            zmsd(n,i) = 0.0d0
+            norm(n,i) = 0
+30       CONTINUE
+40    CONTINUE
 
-	      xdispstore(n,i)=0.0d0
-	      ydispstore(n,i)=0.0d0
-	      zdispstore(n,i)=0.0d0
-
-15        continue
-
-20    continue
-
-      do 40 n=1,num
-          do 30 i=0,nmsdcorrmax
-              xmsd(n,i)=0.0d0
-	      ymsd(n,i)=0.0d0
-	      zmsd(n,i)=0.0d0
-	      norm(n,i)=0
-30        continue
-40    continue
-
-      do 50 i=0,nmsdcorrmax
-	  do 42 m=1,nspecies
-              do 41 l=1,nspecies
-                  xds(i,m,l)=0.0d0
-                  yds(i,m,l)=0.0d0
-                  zds(i,m,l)=0.0d0
-41            continue
-42        continue
-          normtot(i)=0
-50    continue
-	
+      DO 50 i = 0, nmsdcorrmax
+         DO 42 m = 1, nspecies
+            DO 41 l = 1, nspecies
+               xds(i,m,l) = 0.0d0
+               yds(i,m,l) = 0.0d0
+               zds(i,m,l) = 0.0d0
+41          CONTINUE
+42       CONTINUE
+          normtot(i) = 0
+50    CONTINUE
  
       read(10,*) restart
 
@@ -154,11 +142,9 @@ c==================================================
 
               read(12,*) normtot(i)
 
-70        continue
-
-          close(12)
-
-      endif
+70        CONTINUE
+          CLOSE(12)
+      ENDIF
 
       read(10,*) readfrominpt_log
 
@@ -612,15 +598,14 @@ c======================================================================
 
 180       continue
   
-          write(98,*)time,work
-          write(99,*)time,wnernst
+          WRITE(98,*)time,work
+          WRITE(99,*)time,wnernst
 
-200   continue
+200   CONTINUE
   
-      write (6,*)
-      write (6,*) '*** Mean squared displacements written out. ***'
-      write (6,*)
+      WRITE(6,*)
+      WRITE(6,*) '*** Mean squared displacements written out. ***'
+      WRITE(6,*)
 
       return
-
-      end
+END
